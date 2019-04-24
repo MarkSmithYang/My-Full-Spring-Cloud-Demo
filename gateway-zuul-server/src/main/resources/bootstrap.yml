@@ -1,0 +1,81 @@
+#设置服务端口
+server:
+  port: 9095
+
+#eureka注册中心配置
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka.didispace.com/eureka/
+
+#spring相关配置
+spring:
+  application:
+    #微服务名称
+    name: gateway-zuul-server
+  profiles:
+    #设置配置文件,其实就是以-dev结尾的配置文件
+    active: dev
+  #设置自定义的favicon.ico图标(1.配置文件配置如下2.resources/static下放favicon.ico图标
+  #3.图标不生效多于缓存有关4.favicon.ico可以网上制作,好像直接改图片名也行)
+  mvc:
+    favicon:
+      enabled: false
+  #云配置(分布式配置中心)设置
+  cloud:
+    config:
+      #启用服务发现
+      discovery:
+        enabled: true
+        #云配置微服务名
+        service-id: config-server
+  #中间件rabbitmq的配置
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  #gateway:
+  #  permit: /actuator/info,/actuator/health,/producer/**
+
+  #配置已经通过云配置迁移到github上
+##网关路由配置
+#zuul:
+#  #通过跟踪一个HTTP请求经过Zuul到具体服务,再到返回结果的全过程,我们很容易就能发现,在传递的过程中,
+#  #HTTP请求头信息中的Cookie和Authorization都没有被正确地传递给具体服务,所以最终导致会话状态没有得到保持的现象
+#  #可通过如下配置保持会话,处理方式分为两种:一般都是用全局设置
+#  #全局设置-->这里没有指定那些是敏感的,可以指定例如cookie
+#  sensitive-headers:
+#  #指定路由设置:
+#  #zuul.routes.<routeName>.sensitive-headers=
+#  #zuul.routes.<routeName>.custom-sensitive-headers=true
+#  #--------------------------------------------------------------------------------------------------
+#  #重定向有时会导致URL的HOST部分发生的改变,如下配置能让原本有问题的重定向操作得到正确的处理
+#  add-host-header: true
+#  #添加代理头--据说是必要的
+#  add-proxy-headers: true
+#  #--------------------------------------------------------------------------------------------------
+#  #路由配置
+#  routes:
+#    #这层路径是自定义的,可以是微服务名称,可以统一一个名称,例如server
+#    server:
+#      #通过网关服务访问的/producer/**路由到producer-service/**,根据自己的需要,自定义这个访问路径层
+#      path: /producer/**
+#      #重定向到的服务(根据服务id名称从注册中心获取服务地址),就是微服务名
+#      serviceId: producer-service
+#    auth:
+#      path: /baidu/**
+#      serviceId: resource-server-baidu-auth
+#    resource:
+#      path: /resource/**
+#      serviceId: resource-server
+#    oauth:
+#      path: /authorization/**
+#      serviceId: authorization-server
+#      #实测如下也是可以的,只是网上说的是serviceId用微服务名,url用服务的访问地址(http://host:port/)
+#      #url: producer-service
+#      #实测下面的这种方式也是可以的,只是不认localhost
+#      #url: http://192.168.2.xxx:9001/
+
+

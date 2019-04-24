@@ -1,0 +1,41 @@
+#设置服务端口
+server:
+  port: 9094
+
+#eureka服务注册中心的配置
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka.didispace.com/eureka/
+
+#spring的配置
+spring:
+  application:
+    name: gateway-server
+  profiles:
+    #据说是配置文件名,我们理解的是开发环境
+    active: dev
+  #网关的predicate配置--(根据方法请求来筛选)
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          #true就是从注册中心读取服务,true和false实测似乎都没什么影响
+          enabled: false
+      routes:
+        #既可以通过这个微服务名的方式去找到资源,还可以通过下面的具体地址找到服务,当然了需要满足predicate
+        - id: producer-service
+          uri: lb://producer-service
+          predicates:
+            - Method=GET
+        #所有的GET类型的请求都会路由转发到配置的uri,实测配置前面的横岗(-)不能少,否则访问报错
+        - id: dev
+          uri: http://localhost:9002
+          #有重写路径功能
+          filters:
+            - RedirectTo=302,https://www.baidu.com
+            - AddRequestHeader=X-Request-Foo, Bar
+          predicates:
+            #通过POST请求时,报404错误
+            - Method=GET
+            - Host=127.0.0.1

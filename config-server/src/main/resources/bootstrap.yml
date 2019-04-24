@@ -1,0 +1,53 @@
+#设置端口号
+server:
+  port: 9096
+
+#spring 相关配置
+spring:
+  application:
+    #微服务名
+    name: config-server
+  profiles:
+    #指定配置文件为-dev的
+    active: dev
+  #配置中心(云配置)相关配置
+  cloud:
+    config:
+      server:
+        ##git中心配置（这里我将配置文件存储在码云(osChina--(开源中国))上,实测码云的webhooks不好写,所以换成了GitHub）
+        git:
+          #配置文件所在的服务地址
+          uri: https://github.com/MarkSmithYang/Spring-Cloud-Config.git
+          #配置文件前缀 （这里配置的name+profile为我们要读的配置文件 即 config-server-dev）
+          search-paths: '{application}'
+          #GitHub的用户名和密码--填写过一次以后,居然不用些用户名和密码也可以(应该是用户名和密码信息被存储了)
+          username: MarkSmithYang
+          password: msy%@)1314
+  #中间件rabbitmq的配置
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+#eureka的相关配置
+eureka:
+  client:
+    service-url:
+      #配置服务中心(可配置多个,用逗号隔开)
+      defaultZone: http://eureka.didispace.com/eureka/
+
+#logback的日志配置
+logging:
+  file: log/${spring.application.name}.log
+
+#如果需要手动去刷新配置,需要引入actuator依赖,还需要暴露refresh端点,并且post访问/actuator/refresh
+#如果是用的消息总线,把配置中心服务引入bus依赖,并且使用webhooks(钩子)更新config-server的配置,刷新路径/actuator/bus-refresh,
+#和客户端刷新的方式一样,只是使用消息总线的时候,只需在配置服务端做服务的刷新即可,而不用每个客户端去刷新
+#而GitHub或者Gitee(码云)使用钩子(webhooks)似乎是需要域名的那种,实测ip的方式不能成功
+#客户端出现Received remote refresh request. Keys refreshed [],表示刷新操作已经执行,只是我这里没有内容
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ["info","health","bus-refresh"]

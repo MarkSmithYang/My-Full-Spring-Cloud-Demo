@@ -1,0 +1,24 @@
+#设置服务端口
+server:
+  port: 9091
+
+#eureka服务注册中心的配置
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka.didispace.com/eureka/
+
+#服务的微服务名称
+spring:
+  application:
+    name: authorization-server
+  #mongodb配置
+  data:
+    mongodb:
+      database: app
+      host: localhost
+  #redis的连接配置
+  redis:
+    host: localhost
+    port: 6379
+# 注意如果不使用jpa就不要引入依赖,不然会导致启动报错,因为需要数据库配置

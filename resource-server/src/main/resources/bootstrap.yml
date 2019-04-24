@@ -1,0 +1,32 @@
+#设置服务端口
+server:
+  port: 9092
+
+#eureka服务注册中心的配置
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka.didispace.com/eureka/
+
+#服务的微服务名称
+spring:
+  application:
+    name: resource-server
+  #mongodb配置
+  data:
+    mongodb:
+      database: app
+      host: localhost
+  #redis的连接配置
+  redis:
+    host: localhost
+    port: 6379
+  #安全配置
+  security:
+    #oauth2配置
+    oauth2:
+      resource:
+        #ResourceServer的Filter们的顺序
+        filter-order: 3
+
+
