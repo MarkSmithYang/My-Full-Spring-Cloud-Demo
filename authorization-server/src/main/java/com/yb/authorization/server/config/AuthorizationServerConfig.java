@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
  * 然后你在本地做资源服务,但是认证和资源服务不是非要物理上的分离,只需要做到逻辑上的分离就好
  * 继承WebSecurityConfigurerAdapter的目的这里仅仅只是为了获取AuthenticationManager的bean,当然了如果写
  * 了另一个配置来继承AuthenticationManager也是需要这个bean的,我这里是觉得没必要再写了
+ * --------------这个是类似与第三方的的认证服务(可替代第三方完成认证功能)
  * author biaoyang
  * Date: 2019/4/18 0018
  */
@@ -31,10 +32,6 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 @EnableAuthorizationServer
 @EnableGlobalMethodSecurity(prePostEnabled = true)//开启全局方安全认证
 public class AuthorizationServerConfig extends WebSecurityConfigurerAdapter implements AuthorizationServerConfigurer {
-    //百度的client_id和client_secret
-    private static final String CLINET_ID = "EEIpL5rH0nHSb6XyKhr09gib";
-    private static final String CLIENT_SECRET = "IdEFMfq1sX5EEa0FDANuIbHk3ffYQXjq";
-    private static final String CLIENT_SECRET_ENCODE = "$2a$10$X497YEX9QdctxjnG8NkoEelUsZUUPdktm98YRV6QKj.Kdmw49qDC2";
 
     @Autowired
     public UserDetailsServiceImpl userDetailsService;
@@ -72,25 +69,11 @@ public class AuthorizationServerConfig extends WebSecurityConfigurerAdapter impl
         return tokenConverter;
     }
 
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//        http.csrf().and().httpBasic().disable()
-//                //资源服务设置的这个登录才是比较好的,因为会先来访问它,总之,先访问谁,谁就需要抛出登录提示
-//                .exceptionHandling().authenticationEntryPoint((request, response, exception) ->{
-    //设置响应编码,避免中文乱码
-    // response.setCharacterEncoding("UTF-8");
-//                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "请登录se");})
-//                .and()
-//                .authorizeRequests()
-//                .anyRequest()
-//                .authenticated();
-//    }
-
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints.userDetailsService(userDetailsService)
                 .authenticationManager(authenticationManagerBean());
-//        endpoints.tokenStore(tokenStore());
+        endpoints.tokenStore(tokenStore());
         //实测这个对于jwt来说是必要的,不管不增强不增强,都需要设置这个才能正确获取到jwt的token,
         //否则只是个UUID,是没实现jwt存储和转换的,这里仅仅只是使用了,普通的字符串作为秘钥签名的
         //可以使用公私钥加密和增强(添加额外的内容到jwt里)来
@@ -99,12 +82,12 @@ public class AuthorizationServerConfig extends WebSecurityConfigurerAdapter impl
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-        //对获取Token的请求不再拦截
-//        security.tokenKeyAccess("permitAll()")
-//                //验证获取Token的验证信息
-//                .checkTokenAccess("isAuthenticated()")
-//                //允许提交表单,一般都是json对象提交的
-//                .allowFormAuthenticationForClients();
+        //对获取Token的请求不再拦截,舍不设置,似乎没有什么关系
+        security.tokenKeyAccess("permitAll()")
+                //验证获取Token的验证信息
+                .checkTokenAccess("isAuthenticated()")
+                //允许提交表单,一般都是json对象提交的
+                .allowFormAuthenticationForClients();
         //设置加密,否则不能解密密码
         security.passwordEncoder(bCryptPasswordEncoder());
     }

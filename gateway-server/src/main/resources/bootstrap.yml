@@ -7,14 +7,22 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka.didispace.com/eureka/
-
 #spring的配置
 spring:
   application:
     name: gateway-server
+  #设置自定义的favicon.ico图标(1.配置文件配置如下2.resources/static下放favicon.ico图标
+  #3.图标不生效多于缓存有关4.favicon.ico可以网上制作,好像直接改图片名也行)
+  mvc:
+    favicon:
+      enabled: false
   profiles:
     #据说是配置文件名,我们理解的是开发环境
     active: dev
+    #redis的配置,这个都是默认值
+  #    redis:
+  #      host: localhost
+  #      port: 6379
   #网关的predicate配置--(根据方法请求来筛选)
   cloud:
     gateway:
@@ -39,3 +47,17 @@ spring:
             #通过POST请求时,报404错误
             - Method=GET
             - Host=127.0.0.1
+
+#网关用来显示各个服务接口子系统的swagger文档的相关设置
+permit:
+  config:
+    swaggerResource:
+      #实测,中文开头是不行滴,断点之后发现,原来它是会去掉中文的,变成了authorization而不是authorization认证服务
+      authorization认证服务: /authorization-server/v2/api-docs
+      resource资源服务: /resource-server/v2/api-docs
+      baidu-auth百度第三登录的资源服务: /resource-server-baidu-auth/v2/api-docs
+    #设置不需要登录的url地址
+    permitUrls: /,/swagger-ui.html,/swagger-resources/**, /**/v2/api-docs,/webjars/springfox-swagger-ui/**,
+      /**/favicon.ico,/group1/**,/actuator/info,/actuator/health
+    #jwt的token的加密秘钥(gateway-oauth2-secret)
+    base64Secret: Z2F0ZXdheS1vYXV0aDItc2VjcmV0
