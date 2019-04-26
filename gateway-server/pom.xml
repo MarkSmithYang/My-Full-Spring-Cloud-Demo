@@ -36,12 +36,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-        <!--jwt的依赖引入,这个主要是用来处理那种手动生成和解析jwt的,事实上如果使用了OAuth2的那个资源服务和认证服务,
-        那个jwt是自动转换的,但是这个可以更灵活的添加自己想要添加的东西-->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-        </dependency>
         <!--webflux的swagger所需依赖-->
         <dependency>
             <groupId>io.springfox</groupId>

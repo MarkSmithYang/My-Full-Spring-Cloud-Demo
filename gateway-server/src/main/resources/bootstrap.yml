@@ -31,11 +31,16 @@ spring:
           #true就是从注册中心读取服务,true和false实测似乎都没什么影响
           enabled: false
       routes:
+        #注意如果接口返回的是view(例如login.html),实测网关汇报404找不到
+        - id: user-server
+          uri: lb://user-server
+          predicates:
+            - Host=127.0.0.1
         #既可以通过这个微服务名的方式去找到资源,还可以通过下面的具体地址找到服务,当然了需要满足predicate
         - id: producer-service
           uri: lb://producer-service
           predicates:
-            - Method=GET
+            - Host=localhost
         #所有的GET类型的请求都会路由转发到配置的uri,实测配置前面的横岗(-)不能少,否则访问报错
         - id: dev
           uri: http://localhost:9002
@@ -58,6 +63,6 @@ permit:
       baidu-auth百度第三登录的资源服务: /resource-server-baidu-auth/v2/api-docs
     #设置不需要登录的url地址
     permitUrls: /,/swagger-ui.html,/swagger-resources/**, /**/v2/api-docs,/webjars/springfox-swagger-ui/**,
-      /**/favicon.ico,/group1/**,/actuator/info,/actuator/health
+      /**/favicon.ico,/group1/**,/actuator/info,/actuator/health,/test,/user-server/userLogin,/user-server/userRegister
     #jwt的token的加密秘钥(gateway-oauth2-secret)
     base64Secret: Z2F0ZXdheS1vYXV0aDItc2VjcmV0

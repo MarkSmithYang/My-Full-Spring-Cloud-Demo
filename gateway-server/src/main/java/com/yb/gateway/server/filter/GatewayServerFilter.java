@@ -1,8 +1,8 @@
 package com.yb.gateway.server.filter;
 
+import com.yb.common.server.other.LoginUser;
+import com.yb.common.server.utils.JwtUtils;
 import com.yb.gateway.server.config.ApplicationPermitConfig;
-import com.yb.gateway.server.other.JwtUtils;
-import com.yb.gateway.server.other.LoginUser;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,11 +19,9 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
-
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Base64;
 import java.util.Objects;
 
 /**

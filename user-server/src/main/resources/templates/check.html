@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>校验提示页面</title>
+</head>
+<body>
+    <h1>哎呀,出错啦</h1>
+    <hr>
+    <div style="color: red" th:text="${checkMessage}"></div>
+    <table>
+        <tr>
+            <td><a href="/login">登录</a></td>
+            <td><a href="/register">注册</a></td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1,4 +1,4 @@
-package com.yb.gateway.server.other;
+package com.yb.common.server.other;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Getter;

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>我的登录页</h1>
+<hr>
+<form action="userLogin" method="get">
+    <table>
+        <thead style="color: red">登 录</thead>
+        <tbody>
+        <tr>
+            <td>用户名:</td>
+            <td><input type="text" name="username" value="jack"></td>
+        </tr>
+        <tr>
+            <td>密码:</td>
+            <td><input type="password" name="password" value="jack"></td>
+        </tr>
+        <tr>
+            <td><input type="submit" value="登录"></td>
+        </tr>
+        <tr>
+            <td>
+                <div style="color: red" th:text="${message}"></div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+
+</body>
+</html>

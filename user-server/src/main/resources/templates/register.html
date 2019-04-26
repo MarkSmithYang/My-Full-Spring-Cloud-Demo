@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1 style="color: blue">我的注册页</h1>
+<hr>
+<form action="userRegister" method="get">
+    <table>
+        <thead style="color: blue">注 册</thead>
+        <tbody>
+        <tr>
+            <td>用户名:</td>
+            <td><input type="text" name="username"></td>
+        </tr>
+        <tr>
+            <td>密码:</td>
+            <td><input type="password" name="password"></td>
+        </tr>
+        <tr>
+            <td>角色:</td>
+            <td><input type="checkbox" name="roles" value="admin">管理员</td>
+        </tr>
+        <tr>
+            <td><input type="submit" value="注册"></td>
+        </tr>
+        <tr>
+            <td>
+                <div style="color: red" th:text="${error}"></div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+</body>
+</html>

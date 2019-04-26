@@ -1,6 +1,7 @@
-package com.yb.gateway.server.other;
+package com.yb.common.server.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.yb.common.server.other.LoginUser;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -60,7 +61,7 @@ public class JwtUtils {
      */
     public static boolean verifySignature(String jsonWebToken, String base64Secret) {
         return Jwts.parser()
-                .setSigningKey(DatatypeConverter.parseBase64Binary(base64Secret))
+                .setSigningKey(getKey(base64Secret, SignatureAlgorithm.HS512.getJcaName()))
                 .isSigned(jsonWebToken);
     }
 
@@ -140,10 +141,10 @@ public class JwtUtils {
     public static LoginUser checkAndGetPayload(String jwtWebToken, String base64Secret) {
         //判断token的合法性
         if (StringUtils.isNotBlank(jwtWebToken) && jwtWebToken.startsWith("Bearer ")) {
+            //去掉头部的Bearer
+            jwtWebToken = jwtWebToken.replaceFirst("Bearer ", "");
             //验证签名
             if (verifySignature(jwtWebToken, base64Secret)) {
-                //去掉头部的Bearer
-                jwtWebToken = jwtWebToken.replaceFirst("Bearer ", "");
                 //对jwt的token进行切割判断
                 if (jwtWebToken.contains(".") && jwtWebToken.split("\\.").length == 3) {
                     //获取荷载内容
