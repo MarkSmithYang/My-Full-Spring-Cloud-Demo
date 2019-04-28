@@ -1,5 +1,6 @@
 package com.yb.gateway.server.filter;
 
+import com.yb.common.server.dic.JwtDic;
 import com.yb.common.server.other.LoginUser;
 import com.yb.common.server.utils.JwtUtils;
 import com.yb.gateway.server.config.ApplicationPermitConfig;
@@ -34,9 +35,6 @@ import java.util.Objects;
 public class GatewayServerFilter implements WebFilter {
     private static final Logger log = LoggerFactory.getLogger(GatewayServerFilter.class);
 
-    public static final String REDIS_SET_JTI_KEY = "myJti";
-    public static final String HEADERS_NAME = "Authorization";
-    public static final String HEADERS_VALUE_PREFIX = "Bearer ";
     //通过构造的方式来注入
     private final RedisTemplate<String, Serializable> redisTemplate;
     private final PathMatcher pathMatcher = new AntPathMatcher();
@@ -44,8 +42,7 @@ public class GatewayServerFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String authorization = exchange.getRequest().getHeaders().getFirst(HEADERS_NAME);
-        System.err.println("哈哈哈==" + authorization);
+        String authorization = exchange.getRequest().getHeaders().getFirst(JwtDic.HEADERS_NAME);
         //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value();
@@ -60,12 +57,12 @@ public class GatewayServerFilter implements WebFilter {
         }
         final ServerHttpRequest httpRequest;
         if (StringUtils.isBlank(authorization)) {
-            authorization = HEADERS_VALUE_PREFIX + request.getQueryParams().getFirst(HEADERS_NAME);
+            authorization = JwtDic.HEADERS_VALUE_PREFIX + request.getQueryParams().getFirst(JwtDic.HEADERS_NAME);
             if (StringUtils.isNotBlank(authorization)) {
                 httpRequest = request
                         .mutate()
                         .path(path)
-                        .header(HEADERS_NAME, authorization).build();
+                        .header(JwtDic.HEADERS_NAME, authorization).build();
             } else {
                 httpRequest = request
                         .mutate()
@@ -94,13 +91,17 @@ public class GatewayServerFilter implements WebFilter {
             }
         }
         //判断jti是否在redis里(主要是用这个联合判断jwt的token是否手动使其失效)
-        if (StringUtils.isNotBlank(permitConfig.getBase64Secret())) {
-            LoginUser loginUser = JwtUtils.checkAndGetPayload(authorization, permitConfig.getBase64Secret());
+        if (StringUtils.isNotBlank(JwtDic.BASE64_ENCODE_SECRET)) {
+            LoginUser loginUser = JwtUtils.checkAndGetPayload(authorization, JwtDic.BASE64_ENCODE_SECRET);
             if (Objects.nonNull(loginUser)) {
-                Boolean login = redisTemplate.opsForSet().isMember(REDIS_SET_JTI_KEY + loginUser.getUsername(), loginUser.getJti());
+                Boolean login = redisTemplate.opsForSet().isMember(JwtDic.REDIS_SET_JTI_KEY + loginUser.getUsername(), loginUser.getJti());
                 if (Objects.nonNull(login) && login) {
-                    chain.filter(exchange);
+                    //注意这个方式没法解决接口权限认证的问题,如果加security的全局方法认证,需要引入security依赖,引入依赖就会导致url被拦截,又需要做许多事,
+                    //而且不知道怎么传递那个登陆信息到其他系统去,因为需要通过共享登陆信息,才能通过登录信息去,认证接口的权限
+                    return chain.filter(exchange);
                 }
+            } else {
+                log.info("redis里找不到该用户登录的token的jti信息");
             }
         }
         //不合法请求,提示登录设置

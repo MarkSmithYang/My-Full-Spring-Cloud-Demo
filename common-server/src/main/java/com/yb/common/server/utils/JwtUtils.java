@@ -1,14 +1,20 @@
 package com.yb.common.server.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.yb.common.server.dic.JwtDic;
 import com.yb.common.server.other.LoginUser;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.lang3.StringUtils;
+import sun.rmi.runtime.Log;
+
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
+import java.security.AlgorithmConstraints;
 import java.security.Key;
 import java.util.*;
 
@@ -41,27 +47,15 @@ public class JwtUtils {
     }
 
     /**
-     * 把对象转换为Map,需要commons-beanutils依赖
-     *
-     * @param object
-     * @return
-     */
-    private static Map<String, Object> objectToMap(Object object) {
-        Map<String, Object> map = new HashMap<>(16);
-        new BeanMap(object).forEach((k, v) -> map.put(String.valueOf(k), v));
-        return map;
-    }
-
-    /**
      * 验证jwt的token的 签名
      *
      * @param jsonWebToken
-     * @param base64Secret 经过Base64编码的Secret(秘钥)
+     * @param key
      * @return
      */
-    public static boolean verifySignature(String jsonWebToken, String base64Secret) {
+    public static boolean verifySignature(String jsonWebToken, Key key) {
         return Jwts.parser()
-                .setSigningKey(getKey(base64Secret, SignatureAlgorithm.HS512.getJcaName()))
+                .setSigningKey(key)
                 .isSigned(jsonWebToken);
     }
 
@@ -86,9 +80,10 @@ public class JwtUtils {
                 //.setIssuer(iss)
                 //.setAudience(aud)
                 //添加jwt的id,也就是jti
-                .setId(createJti())
+                .setId(user.getJti())
                 //装填用户信息到荷载
-                .addClaims(objectToMap(user))
+                .addClaims((Map<String, Object>) JSON.toJSON(user))
+                //设置subject
                 .setSubject(user.getUsername())
                 .signWith(SignatureAlgorithm.HS512, key);
         //添加Token过期时间
@@ -97,8 +92,8 @@ public class JwtUtils {
             Date exp = new Date(expMillis);
             builder.setExpiration(exp).setNotBefore(new Date(System.currentTimeMillis()));
         }
-        //生成JWT
-        return builder.compact();
+        //生成JWT并为其加上前缀Bearer
+        return JwtDic.HEADERS_VALUE_PREFIX + builder.compact();
     }
 
     /**
@@ -117,8 +112,6 @@ public class JwtUtils {
                 //这个两个内容可要可不要
                 //.setIssuer(iss)
                 //.setAudience(aud)
-                //添加jwt的id,也就是jti
-                .setId(createJti())
                 .claim("scope", "REFRESH")
                 .setSubject(username)
                 .signWith(SignatureAlgorithm.HS256, key);
@@ -143,12 +136,14 @@ public class JwtUtils {
         if (StringUtils.isNotBlank(jwtWebToken) && jwtWebToken.startsWith("Bearer ")) {
             //去掉头部的Bearer
             jwtWebToken = jwtWebToken.replaceFirst("Bearer ", "");
+            Key key = getKey(base64Secret, SignatureAlgorithm.HS512.getJcaName());
             //验证签名
-            if (verifySignature(jwtWebToken, base64Secret)) {
+            if (verifySignature(jwtWebToken, key)) {
                 //对jwt的token进行切割判断
                 if (jwtWebToken.contains(".") && jwtWebToken.split("\\.").length == 3) {
-                    //获取荷载内容
-                    String payload = new String(Base64.getUrlDecoder().decode(jwtWebToken.split("\\.")[1]));
+                    //获取荷载内容,实测用DatatypeConverter.parseBase64Binary解析,会导致解析出的荷载是没有后面那个大括号的,会导致解析成LoginUser失败
+                    //String payload = new String(DatatypeConverter.parseBase64Binary(jwtWebToken.split("\\.")[1]));
+                    String payload = new String(Base64.getDecoder().decode(jwtWebToken.split("\\.")[1]));
                     //解析荷载(封装的时候也要是JSON转的对象,才能反过来解析出来)
                     return StringUtils.isNotBlank(payload) ? JSON.parseObject(payload, LoginUser.class) : null;
                 }

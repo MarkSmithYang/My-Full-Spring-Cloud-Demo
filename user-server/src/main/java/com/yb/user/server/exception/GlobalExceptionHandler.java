@@ -1,6 +1,5 @@
 package com.yb.user.server.exception;
 
-import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -8,8 +7,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
@@ -42,7 +39,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public String exceptionHandler(RuntimeException e, Model model) {
         log.error(e.getMessage(), e);
-        model.addAttribute("checkMessage", e.getMessage());
+        model.addAttribute("checkMessage","网络异常");
         return "forward:/checkMessage";
     }
 
@@ -50,7 +47,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public String exceptionHandler(Exception e, Model model) {
         log.error(e.getMessage(), e);
-        model.addAttribute("checkMessage", e.getMessage());
+        model.addAttribute("checkMessage", "网络异常");
         return "forward:/checkMessage";
     }
 
