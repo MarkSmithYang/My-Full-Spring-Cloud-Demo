@@ -22,13 +22,13 @@ spring:
     favicon:
       enabled: false
   #云配置(分布式配置中心)设置
-  cloud:
-    config:
-      #启用服务发现
-      discovery:
-        enabled: true
-        #云配置微服务名
-        service-id: config-server
+#  cloud:
+#    config:
+#      #启用服务发现
+#      discovery:
+#        enabled: true
+#        #云配置微服务名
+#        service-id: config-server
   #中间件rabbitmq的配置
   rabbitmq:
     host: localhost
@@ -36,8 +36,8 @@ spring:
     username: guest
     password: guest
 
-  #gateway:
-  #  permit: /actuator/info,/actuator/health,/producer/**
+gateway:
+  permit: /actuator/info,/actuator/health,/producer/**
 
   #配置已经通过云配置迁移到github上
 ##网关路由配置

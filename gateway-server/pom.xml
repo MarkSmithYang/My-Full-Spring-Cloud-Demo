@@ -20,6 +20,11 @@
     </properties>
 
     <dependencies>
+        <!--security整合webflux,使用Shift+Ctrl+/生成的注释最好-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-security</artifactId>
+        </dependency>
         <!--用来替代zuul做为网关的,据说更优秀,注意,该依赖需要依赖spring-boot-starter-webflux,会与spring-boot-starter-web冲突,
         导入此依赖就需要去掉spring-boot-starter-web依赖,也就是不能在父pom里能够继承到,最好不要把web依赖放在父pom,毕竟不是所有工程都需要它-->
         <dependency>

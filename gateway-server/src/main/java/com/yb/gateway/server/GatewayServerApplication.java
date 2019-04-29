@@ -1,27 +1,19 @@
 package com.yb.gateway.server;
 
-import com.alibaba.fastjson.JSONObject;
-import com.yb.common.server.other.LoginUser;
+import com.yb.common.server.utils.LoginUserUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.hibernate.validator.constraints.Length;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
-import javax.validation.constraints.NotBlank;
-import java.io.Serializable;
+import java.security.Principal;
+import java.util.Set;
 
 @Api(tags = "网关的启动类,也是接口类")
 @Validated
@@ -39,13 +31,18 @@ public class GatewayServerApplication {
     @ApiOperation("不需要登录的测试接口")
     @GetMapping("/test")
     public String test() {
-        return "hello world";
+        return "hello world==";
     }
 
+    //@PreAuthorize("hasRole('admin')"),这个看源码它会自动加前缀的,
+    //所以构造权限进去的时候也需要添加上相同的前缀,所以最好都去看下源码是啥前缀
+    @PreAuthorize("hasRole('admin')")
     @ApiOperation("不需要登录的测试接口")
     @GetMapping("/testNeedLogin")
-    public String testNeedLogin() {
-        return "hello world==testNeedLogin";
+    public String testNeedLogin(Principal principal) {
+        Set<String> strings = LoginUserUtils.getRoles().orElse(null);
+        System.err.println(strings==null?0:strings);
+        return "hello world==testNeedLogin=="+principal;
     }
 
     @ApiOperation("用来返回熔断信息的接口")

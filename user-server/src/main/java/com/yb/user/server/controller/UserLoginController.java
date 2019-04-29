@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.yb.common.server.dic.JwtDic;
 import com.yb.common.server.other.LoginUser;
 import com.yb.common.server.utils.JwtUtils;
+import com.yb.common.server.utils.LoginUserUtils;
 import com.yb.user.server.model.UserInfo;
 import com.yb.user.server.repository.UserInfoRepository;
 import io.swagger.annotations.Api;
@@ -12,21 +13,12 @@ import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.constraints.NotBlank;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -71,6 +63,7 @@ public class UserLoginController {
     @GetMapping("/findAll")
     @ResponseBody
     public List<UserInfo> findAll() {
+        Set<String> roles = LoginUserUtils.getRoles().orElse(new HashSet<>(1));
         List<UserInfo> result = userInfoRepository.findAll();
         return result;
     }
@@ -101,16 +94,10 @@ public class UserLoginController {
             loginUser.setJti(JwtUtils.createJti());
             loginUser.setRoles(new HashSet<>(Arrays.asList(userInfo.getRoles())));
             //用户的登录信息正确,为用户生成token,秘钥和gateway-server保持一致
-            String accessToken = JwtUtils.createAccessToken(loginUser, 10 * 60 * 1000, JwtDic.BASE64_ENCODE_SECRET);
+            String accessToken = JwtUtils.createAccessToken(loginUser, 30 * 60 * 1000, JwtDic.BASE64_ENCODE_SECRET);
             String refreshToken = JwtUtils.createRefreshToken(userInfo.getUsername(), 60 * 60 * 1000, JwtDic.BASE64_ENCODE_SECRET);
             //将jwt的唯一标志存储在redis上--->set没有设置某元素过时间时间的功能,据说默认时间是30天
             redisTemplate.opsForSet().add(JwtDic.REDIS_SET_JTI_KEY + loginUser.getUsername(), loginUser.getJti());
-            Set<GrantedAuthority> authorities = new HashSet<>(5);
-            //设置登录信息到上下文
-            if (!CollectionUtils.isEmpty(loginUser.getRoles())) {
-                loginUser.getRoles().forEach(s->authorities.add(new SimpleGrantedAuthority(s)));
-            }
-            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(loginUser.getUsername(),authorities));
             //封装token
             jsonObject.put("accessToken", accessToken);
             jsonObject.put("refreshToken", refreshToken);

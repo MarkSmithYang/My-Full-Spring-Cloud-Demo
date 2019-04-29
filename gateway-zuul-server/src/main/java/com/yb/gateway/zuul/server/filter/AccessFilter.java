@@ -3,6 +3,8 @@ package com.yb.gateway.zuul.server.filter;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
+import com.yb.common.server.other.LoginUser;
+import com.yb.common.server.utils.LoginUserUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -11,7 +13,10 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
+
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * -------------------网关这里做的过滤并不能很好的处理访问的开放的问题,例如登录页面的放开,这里就没法弄,
@@ -107,6 +112,13 @@ public class AccessFilter extends ZuulFilter {
         String token = request.getHeader("Authorization");
         //判断token的合法性
         if (StringUtils.isNotBlank(token) && token.startsWith("Bearer ")) {
+            LoginUser loginUser = new LoginUser();
+            loginUser.setUsername("rose");
+            Set<String> set = new HashSet<>(5);
+            set.add("admin");
+            set.add("boss");
+            loginUser.setRoles(set);
+            LoginUserUtils.setUser(loginUser);
             //通过Jwt工具验证签名
             //通过则解析荷载,把用户信息存入到对应的地方
             //生成jti绑定jwt并存入redis
