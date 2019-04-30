@@ -7,6 +7,8 @@ package com.yb.common.server.dic;
  */
 public class JwtDic {
 
+    /**ROLE_*/
+    public static final String SECURITY_ROLE_PREFIX = "ROLE_";
     /**myJti*/
     public static final String REDIS_SET_JTI_KEY = "myJti";
     /**Authorization*/

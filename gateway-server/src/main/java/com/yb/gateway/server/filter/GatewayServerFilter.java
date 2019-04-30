@@ -18,6 +18,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
@@ -107,7 +108,7 @@ public class GatewayServerFilter implements WebFilter {
             if (StringUtils.isNotBlank(JwtDic.BASE64_ENCODE_SECRET)) {
                 Boolean flag = redisTemplate.opsForSet().isMember(JwtDic.REDIS_SET_JTI_KEY + loginUser.getUsername(), loginUser.getJti());
                 if (Objects.nonNull(flag) && flag) {
-                    //设置登录用户信息到LoginUserUtils工具类中
+                    //设置登录用户信息到LoginUserUtils工具类中，这个只在这个工程服务有效
                     LoginUserUtils.setUser(loginUser);
                     //注意这个方式没法解决接口权限认证的问题,如果加security的全局方法认证,需要引入security依赖,引入依赖就会导致url被拦截,又需要做许多事,
                     //而且不知道怎么传递那个登陆信息到其他系统去,因为需要通过共享登陆信息,才能通过登录信息去,认证接口的权限,要么就使用zuul的网关,要么就使用
@@ -126,7 +127,7 @@ public class GatewayServerFilter implements WebFilter {
                     }
                     //构造用户登录信息
                     Authentication authentication = new UsernamePasswordAuthenticationToken(loginUser.getUsername(), null, set);
-                    //设置登录信息到上下文中
+                    //设置登录信息到上下文中,@@这个上下文只对网关服务有效,传递不到其他的服务,因为彼此线程间是没有关系的
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
                     return chain.filter(exchange);

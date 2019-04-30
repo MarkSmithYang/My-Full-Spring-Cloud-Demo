@@ -1,5 +1,7 @@
 package com.yb.resource.server.baidu.auth.config;
 
+import com.yb.resource.server.baidu.auth.filter.MyServerFilter;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -17,39 +20,20 @@ import org.springframework.web.client.RestTemplate;
  * date 2019/4/22
  */
 @Configuration
-@EnableResourceServer
 @EnableWebSecurity
+@EnableResourceServer
+@AllArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     private static final Logger log = LoggerFactory.getLogger(ResourceServerConfig.class);
 
-    @Bean(name = "myRestTemplate")
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
+    private final MyServerFilter myServerFilter;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.csrf().and().httpBasic().disable()
-//                .requestMatcher(request -> {
-//                    String authorization = "21.f26ff6638ed4b4e4e584a263bb5f703c.2592000.1558520672.1143166762-16078580";
-//                    try {
-//                        JSONObject forObject = restTemplate().getForObject("https://openapi.baidu.com/rest/2.0/passport" +
-//                                "/users/getLoggedInUser?access_token=" + authorization, JSONObject.class);
-//                        if (!MapUtils.isEmpty(forObject)) {
-//                            Long uid = forObject.getLong("uid");
-//                            if (uid != null) {
-//                                SecurityContext context = SecurityContextHolder.getContext();
-//                                Authentication token = new UsernamePasswordAuthenticationToken(forObject.getString("uname"), null, null);
-//                                context.setAuthentication(token);
-//                                return true;
-//                            }
-//                        }
-//                    } catch (RestClientException e) {
-//                        log.info("无效的token信息", e);
-//                    }
-//                    return false;
-//                })
+                //这个设置是必要的,具体原因不细说了,在user-server有详细说
+                .addFilterAfter(myServerFilter, SecurityContextPersistenceFilter.class)
                 //资源服务设置的这个登录才是比较好的,因为会先来访问它,总之,先访问谁,谁就需要抛出登录提示
                 .exceptionHandling().authenticationEntryPoint((request, response, exception) -> {
             //当访问接口时,没有登录不再提示请登录,而是直接跳转到登录页去

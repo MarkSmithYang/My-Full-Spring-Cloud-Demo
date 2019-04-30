@@ -3,7 +3,9 @@ package com.yb.gateway.zuul.server.filter;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
+import com.yb.common.server.dic.JwtDic;
 import com.yb.common.server.other.LoginUser;
+import com.yb.common.server.utils.JwtUtils;
 import com.yb.common.server.utils.LoginUserUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +18,7 @@ import org.springframework.util.PathMatcher;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -112,31 +115,28 @@ public class AccessFilter extends ZuulFilter {
         String token = request.getHeader("Authorization");
         //判断token的合法性
         if (StringUtils.isNotBlank(token) && token.startsWith("Bearer ")) {
-            LoginUser loginUser = new LoginUser();
-            loginUser.setUsername("rose");
-            Set<String> set = new HashSet<>(5);
-            set.add("admin");
-            set.add("boss");
-            loginUser.setRoles(set);
-            LoginUserUtils.setUser(loginUser);
+            //前提是token是根据该秘钥生成的,其实就是通过JwtUtils工具生成的token
+            LoginUser loginUser = JwtUtils.checkAndGetPayload(token, JwtDic.BASE64_ENCODE_SECRET);
+            if (Objects.nonNull(loginUser)) {
+                LoginUserUtils.setUser(loginUser);
+            }
             //通过Jwt工具验证签名
             //通过则解析荷载,把用户信息存入到对应的地方
             //生成jti绑定jwt并存入redis
-        } else {
-            //这里根之前使用的那个AuthorizationEntryPoint的实现类返回的信息差不多的
-            //不会继续往下执行,不会调用服务接口了,网关直接响应给客户了
-            ctx.setSendZuulResponse(false);
-            //设置响应码
-            ctx.setResponseStatusCode(HttpStatus.SC_UNAUTHORIZED);//401
-            //让浏览器用utf8来解析返回的数据,需要和下面的setCharacterEncoding的编码保持一致
-            ctx.addZuulResponseHeader("Content-type", "text/html;charset=UTF-8");
-            //告诉servlet用UTF-8转码，而不是用默认的ISO8859-1,这个需要在写中文前设置
-            ctx.getResponse().setCharacterEncoding("UTF-8");
-            //可以直接返回提示请登录,也可以字符串化一个对象返回
-            ctx.setResponseBody("请登录");
-            //还可以使用下面这种方式,只是下面的需要处理异常,不推荐
-            //ctx.getResponse().getWriter().write("请登录");
         }
+        //这里根之前使用的那个AuthorizationEntryPoint的实现类返回的信息差不多的
+        //不会继续往下执行,不会调用服务接口了,网关直接响应给客户了
+        ctx.setSendZuulResponse(false);
+        //设置响应码
+        ctx.setResponseStatusCode(HttpStatus.SC_UNAUTHORIZED);//401
+        //让浏览器用utf8来解析返回的数据,需要和下面的setCharacterEncoding的编码保持一致
+        ctx.addZuulResponseHeader("Content-type", "text/html;charset=UTF-8");
+        //告诉servlet用UTF-8转码，而不是用默认的ISO8859-1,这个需要在写中文前设置
+        ctx.getResponse().setCharacterEncoding("UTF-8");
+        //可以直接返回提示请登录,也可以字符串化一个对象返回
+        ctx.setResponseBody("请登录");
+        //还可以使用下面这种方式,只是下面的需要处理异常,不推荐
+        //ctx.getResponse().getWriter().write("请登录");
         return null;
     }
 }

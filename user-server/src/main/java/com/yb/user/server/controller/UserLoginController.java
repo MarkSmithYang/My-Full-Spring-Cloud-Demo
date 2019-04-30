@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,8 +63,8 @@ public class UserLoginController {
     @ApiOperation("跳转注册页接口")
     @GetMapping("/findAll")
     @ResponseBody
+    @PreAuthorize("hasRole('admin1')")
     public List<UserInfo> findAll() {
-        Set<String> roles = LoginUserUtils.getRoles().orElse(new HashSet<>(1));
         List<UserInfo> result = userInfoRepository.findAll();
         return result;
     }

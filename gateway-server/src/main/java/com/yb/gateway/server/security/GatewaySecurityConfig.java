@@ -30,7 +30,7 @@ public class GatewaySecurityConfig {
                 //而security一旦引入就会拦截所有url,所以需要配置这个类,而这个网关默认使用的webflux,会与web依赖冲突,所以才是这样的配置
                 .addFilterAt(gatewayServerFilter, SecurityWebFiltersOrder.FIRST)//优先使用过滤器
                 //注意这里不能设置拦截,不然网关请求路径都会在这被拦截(即使过滤器放过了)
-                .authorizeExchange().pathMatchers("/**").permitAll();
+                .authorizeExchange().pathMatchers("/**").permitAll().anyExchange().authenticated();
         return http.build();
     }
 
