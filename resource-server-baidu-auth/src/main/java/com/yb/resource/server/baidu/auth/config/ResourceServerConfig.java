@@ -2,29 +2,23 @@ package com.yb.resource.server.baidu.auth.config;
 
 import com.yb.resource.server.baidu.auth.filter.MyServerFilter;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
-import org.springframework.web.client.RestTemplate;
 
 /**
- * Description: 资源服务器
+ * Description: 资源服务器-------------------->实测资源服务器需要和认证服务器配套使用,因为它开启了注解,
+ * 就开启了它默认的过滤器去tokenStore找token,自然就找不到了,所以弄成一个普通的有security保护的项目,然后
+ * 通过去第三方应用例如百度,按以前的方式去获取token(去掉了OAuth2,不知道还行不行,没测试)用户信息,生成token给自己的项目用
  * author biaoyang
  * date 2019/4/22
  */
-@Configuration
 @EnableWebSecurity
-@EnableResourceServer
 @AllArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
+public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
 
     private final MyServerFilter myServerFilter;
 
@@ -42,7 +36,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
             //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "请登录");
         }).and()
                 .authorizeRequests()
-                .antMatchers("/", "/login").permitAll()
+                .antMatchers("/", "/login", "/userLogin").permitAll()
                 .anyRequest()
                 .authenticated();
     }

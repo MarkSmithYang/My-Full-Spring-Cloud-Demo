@@ -32,6 +32,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
      */
     @Bean
     public TokenStore tokenStore() {
+        //RemoteTokenServices
+        //OAuth2AuthenticationProcessingFilter
         //通过jwt来存储token信息,而不是redis
         return new JwtTokenStore(jwtAccessTokenConverter());
     }
