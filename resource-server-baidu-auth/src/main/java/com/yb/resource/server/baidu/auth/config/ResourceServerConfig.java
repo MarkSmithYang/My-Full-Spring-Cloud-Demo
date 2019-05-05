@@ -25,7 +25,6 @@ import org.springframework.web.client.RestTemplate;
 @AllArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
-    private static final Logger log = LoggerFactory.getLogger(ResourceServerConfig.class);
 
     private final MyServerFilter myServerFilter;
 

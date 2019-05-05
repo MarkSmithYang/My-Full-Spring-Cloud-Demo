@@ -12,11 +12,11 @@ eureka:
 spring:
   application:
     name: resource-server-baidu-auth
-  #mongodb配置
-  data:
-    mongodb:
-      database: app
-      host: localhost
+#  #mongodb配置
+#  data:
+#    mongodb:
+#      database: app
+#      host: localhost
 # 个人觉得如下配用不着
 #  #redis的连接配置
 #  redis:

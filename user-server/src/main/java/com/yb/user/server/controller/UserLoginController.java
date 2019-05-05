@@ -63,7 +63,7 @@ public class UserLoginController {
     @ApiOperation("跳转注册页接口")
     @GetMapping("/findAll")
     @ResponseBody
-    @PreAuthorize("hasRole('admin1')")
+    @PreAuthorize("hasRole('admin')")
     public List<UserInfo> findAll() {
         List<UserInfo> result = userInfoRepository.findAll();
         return result;

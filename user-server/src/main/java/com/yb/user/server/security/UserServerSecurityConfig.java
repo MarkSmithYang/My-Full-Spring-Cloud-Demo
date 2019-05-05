@@ -28,7 +28,7 @@ public class UserServerSecurityConfig extends WebSecurityConfigurerAdapter {
                 //而且实测必须在这里设置自定义的过滤器,否则不会走过滤器的
                 //这里如果写自己实现或继承的过滤器,需要设置在其后面(因该是需要先加载过滤器信息,才能后信息给你继承或这个实现,否则异常)
                 .addFilterAfter(userServerFilter, SecurityContextPersistenceFilter.class)
-                .authorizeRequests().antMatchers("/").permitAll()
+                .authorizeRequests().antMatchers("/","/login","/userLogin","/register").permitAll()
                 //需要开启认证,来进行对方法认证,实测不设置这个也会拦截(抛出无权限访问),最好设置上吧,可读性强些
                 .anyRequest().authenticated();
     }

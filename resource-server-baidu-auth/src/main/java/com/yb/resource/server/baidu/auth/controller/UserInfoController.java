@@ -23,6 +23,28 @@ public class UserInfoController {
      * 测试接口
      * @return
      */
+    @PreAuthorize("hasRole('guest')")
+    @GetMapping("yes")
+    @ResponseBody
+    public String yes(){
+        return "hello yes";
+    }
+
+    /**
+     * 测试接口
+     * @return
+     */
+    @GetMapping("no")
+    @ResponseBody
+    public String no(){
+        return "hello no";
+    }
+
+    /**
+     * 测试接口
+     * @return
+     */
+    @PreAuthorize("hasRole('admin')")
     @GetMapping("world")
     @ResponseBody
     public String world(){
