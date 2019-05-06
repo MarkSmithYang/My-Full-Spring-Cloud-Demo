@@ -14,11 +14,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.ModelAndView;
 import org.thymeleaf.util.MapUtils;
 
 import javax.validation.constraints.NotBlank;
@@ -28,14 +26,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Description:
+ * Description: 目前的swagger配置老是不对,没有使用
  * author biaoyang
  * date 2019/4/8 000819:21
  */
 @Validated
 @CrossOrigin
-@Controller
-public class UserInfoController {
+@RestController
+public class MyResourceController {
+    private static final String BAIDU_USER_URL = "https://openapi.baidu.com/rest/2.0/passport/users/getLoggedInUser?access_token=";
+    private static final String BAIDU_AUTHORIZE_URL = "https://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=&redirect_uri=oob";
+    private static final String BAIDU_TOKNE_URL = "https://openapi.baidu.com/oauth/2.0/token?grant_type=authorization_code&code=&client_id=&client_secret=&redirect_uri=oob";
 
     @Bean(name = "myRestTemplate")
     public RestTemplate restTemplate() {
@@ -47,9 +48,9 @@ public class UserInfoController {
      *
      * @return
      */
+    @ApiOperation("测试接口yes")
     @PreAuthorize("hasRole('guest')")
     @GetMapping("yes")
-    @ResponseBody
     public String yes() {
         return "hello yes";
     }
@@ -59,8 +60,8 @@ public class UserInfoController {
      *
      * @return
      */
+    @ApiOperation("测试接口no")
     @GetMapping("no")
-    @ResponseBody
     public String no() {
         return "hello no";
     }
@@ -70,9 +71,9 @@ public class UserInfoController {
      *
      * @return
      */
+    @ApiOperation("测试接口world")
     @PreAuthorize("hasRole('admin')")
     @GetMapping("world")
-    @ResponseBody
     public String world() {
         return "hello world";
     }
@@ -82,9 +83,9 @@ public class UserInfoController {
      *
      * @return
      */
+    @ApiOperation("测试接口hello")
     @PreAuthorize("isAuthenticated()")//已验证合法性后可访问
     @GetMapping("hello")
-    @ResponseBody
     public String hello() {
         return "hello world";
     }
@@ -95,25 +96,28 @@ public class UserInfoController {
      * @param user 当前用户
      * @return 授权信息
      */
+    @ApiOperation("获取当前用户信息")
     @GetMapping("/user")
-    @ResponseBody
-    public Principal user(Principal user) {
-        System.err.println("哎呦,不错哦");
+    public Principal user(@ApiParam(value = "当前用户信息,直接用参数接收的") Principal user) {
         return user;
     }
 
+    @ApiOperation("登录跳转页")
     @GetMapping("/login")
-    public String login() {
-        return "login";
+    public ModelAndView login() {
+        return new ModelAndView("login");
     }
 
     @ApiOperation("简易用户登录获取token")
     @GetMapping("/userLogin")
-    @ResponseBody
-    public JSONObject userLogin() {
-        //先获取授权码,再获取token,然后通过token获取百度账号的用户基本信息
-        String url = "https://openapi.baidu.com/rest/2.0/passport/users/getLoggedInUser?access_token=21.b2696fd2a747a40f713344b80bfee632.2592000.1559210210.1143166762-16078580";
-        JSONObject jsonObject = restTemplate().getForObject(url, JSONObject.class);
+    public JSONObject userLogin(
+            @ApiParam(value = "访问百度用户信息的token")
+            @NotBlank(message = "令牌不能为空")
+            @Length(max = 200, message = "令牌有误")
+            @RequestParam String baiDuAccessToken) {
+        //先获取授权码,再获取token,然后通过token获取百度账号的用户基本信息,直接占位,不用判断是否为空
+        String url = BAIDU_USER_URL+"{baiDuAccessToken}";
+        JSONObject jsonObject = restTemplate().getForObject(url, JSONObject.class, baiDuAccessToken);
         //判断并处理数据
         if (!MapUtils.isEmpty(jsonObject)) {
             //封装信息到LoginUser

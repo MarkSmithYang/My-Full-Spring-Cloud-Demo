@@ -12,23 +12,11 @@ eureka:
 spring:
   application:
     name: resource-server-baidu-auth
-#  #mongodb配置
-#  data:
-#    mongodb:
-#      database: app
-#      host: localhost
-# 个人觉得如下配用不着
-#  #redis的连接配置
-#  redis:
-#    host: localhost
-#    port: 6379
-#  #安全配置
-#  security:
-#    #oauth2配置
-#    oauth2:
-#      resource:
-#        #ResourceServer的Filter们的顺序
-#        filter-order: 3
+  profiles:
+    active: dev
 
+#需要放开的swagger的url
+swagger:
+  permitUrl: /swagger-ui.html,/swagger-resources/**,/**/v2/api-docs,/webjars/springfox-swagger-ui/**,/,/login,/userLogin
 
 

@@ -1,7 +1,11 @@
 package com.yb.resource.server.baidu.auth.config;
 
 import com.yb.resource.server.baidu.auth.filter.MyServerFilter;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,7 +15,7 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 /**
  * Description: 资源服务器-------------------->实测资源服务器需要和认证服务器配套使用,因为它开启了注解,
  * 就开启了它默认的过滤器去tokenStore找token,自然就找不到了,所以弄成一个普通的有security保护的项目,然后
- * 通过去第三方应用例如百度,按以前的方式去获取token(去掉了OAuth2,不知道还行不行,没测试)用户信息,生成token给自己的项目用
+ * 通过去第三方应用例如百度,按以前的方式去获取token用户信息(最好用用户uid因为唯一),生成token给自己的项目用
  * author biaoyang
  * date 2019/4/22
  */
@@ -19,6 +23,9 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 @AllArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
+
+    @Value("${swagger.permitUrl}")
+    private String[] permitUrl;
 
     private final MyServerFilter myServerFilter;
 
@@ -36,7 +43,7 @@ public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
             //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "请登录");
         }).and()
                 .authorizeRequests()
-                .antMatchers("/", "/login", "/userLogin").permitAll()
+                .antMatchers( permitUrl).permitAll()
                 .anyRequest()
                 .authenticated();
     }
