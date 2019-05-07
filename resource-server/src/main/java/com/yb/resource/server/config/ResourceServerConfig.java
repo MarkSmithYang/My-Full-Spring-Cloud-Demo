@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
@@ -32,8 +33,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
      */
     @Bean
     public TokenStore tokenStore() {
-        //RemoteTokenServices
-        //OAuth2AuthenticationProcessingFilter
+        //RemoteTokenServices//可以直接通过它用RestTemplate来请求获取token
+        //OAuth2AuthenticationProcessingFilter//OAuth2特有的过滤器,它会从请求头/请求参数里获取token并验证是不是和存入TokenStore的一致
         //通过jwt来存储token信息,而不是redis
         return new JwtTokenStore(jwtAccessTokenConverter());
     }
@@ -61,7 +62,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
             //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "请登录");
         }).and()
                 .authorizeRequests()
-                .antMatchers("/", "/login").permitAll()
+                .antMatchers("/", "/login","/index").permitAll()
                 .anyRequest()
                 .authenticated();
     }

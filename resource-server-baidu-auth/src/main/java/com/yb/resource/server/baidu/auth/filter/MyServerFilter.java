@@ -39,6 +39,10 @@ public class MyServerFilter extends SecurityContextPersistenceFilter {
         HttpServletRequest request = (HttpServletRequest) req;
         //获取请求头里的token信息
         String token = request.getHeader(JwtDic.HEADERS_NAME);
+        //如果请求头不存在,则去请求参数获取
+        if (StringUtils.isBlank(token)) {
+            token = request.getParameter(JwtDic.ACCESS_TOKEN);
+        }
         //判断token是否存在,并校验其合法性,(checkAndGetPayload已经做了判空和前缀判断)
         LoginUser loginUser = JwtUtils.checkAndGetPayload(token, JwtDic.BASE64_ENCODE_SECRET);
         //判断是否能正确解析出放在荷载里的用户信息(验证签名不通过返回null)

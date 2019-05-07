@@ -113,6 +113,10 @@ public class AccessFilter extends ZuulFilter {
         }
         //获取请求头里的token信息-->这里默认只认key为Authorization的头,jwt都是用这个
         String token = request.getHeader("Authorization");
+        //如果请求头不存在,则去请求参数获取
+        if (StringUtils.isBlank(token)) {
+            token = request.getParameter(JwtDic.ACCESS_TOKEN);
+        }
         //判断token的合法性
         if (StringUtils.isNotBlank(token) && token.startsWith("Bearer ")) {
             //前提是token是根据该秘钥生成的,其实就是通过JwtUtils工具生成的token

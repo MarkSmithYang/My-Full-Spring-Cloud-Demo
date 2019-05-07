@@ -145,7 +145,14 @@ public class JwtUtils {
                     //String payload = new String(DatatypeConverter.parseBase64Binary(jwtWebToken.split("\\.")[1]));
                     String payload = new String(Base64.getDecoder().decode(jwtWebToken.split("\\.")[1]));
                     //解析荷载(封装的时候也要是JSON转的对象,才能反过来解析出来)
-                    return StringUtils.isNotBlank(payload) ? JSON.parseObject(payload, LoginUser.class) : null;
+                    if (StringUtils.isNotBlank(payload)) {
+                        //解析用户信息
+                        LoginUser loginUser = JSON.parseObject(payload, LoginUser.class);
+                        //如果不拥有用户名,那么登录无效
+                        if (Objects.nonNull(loginUser) && StringUtils.isNotBlank(loginUser.getUsername())) {
+                            return loginUser;
+                        }
+                    }
                 }
             }
         }
