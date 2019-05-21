@@ -1,0 +1,21 @@
+#设置服务端口
+server:
+  port: 9098
+#eureka服务注册中心的配置
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka.didispace.com/eureka/
+#spring的配置
+spring:
+  application:
+    name: user-server
+  #配置文件(为配置文件添加dev后缀)
+  profiles:
+    active: dev
+ #数据库连接设置-------密码未做加密处理
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/mybatis_plus_server
+    username: root
+    password: root
